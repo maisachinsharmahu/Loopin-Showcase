@@ -1,95 +1,157 @@
-# Loopin: A Gamified Personal Productivity App
+# Loopin: A Personal Habit Tracker with Data Privacy
 
-Loopin is a habit tracker built with Flutter that focuses on privacy and user engagement. It uses a local-first architecture to ensure data ownership and integrates RPG (Role-Playing Game) elements to make habit consistency more engaging.
+<p align="center">
+  <img src="assets/app_preview/home.png" width="280">
+  <br>
+  <b>A habit tracker built with Flutter that focuses on privacy and gamification.</b>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Stack-Flutter%20%7C%20Hive%20%7C%20Provider-02569B?style=for-the-badge&logo=flutter" alt="Stack">
+  <img src="https://img.shields.io/badge/Architecture-Zero--Knowledge-4CAF50?style=for-the-badge&logo=shield" alt="Privacy">
+  <img src="https://img.shields.io/badge/Build-v1.0.0--Stable-orange?style=for-the-badge" alt="Build">
+</p>
 
 ---
 
 ## 📌 Project Overview
 
-The primary goal of Loopin is to provide a tool for habit tracking where users don't have to worry about their data being stored on third-party servers. All data is persisted locally and synced directly to the user's Google Drive. To increase retention, it uses an XP and Level system similar to an RPG.
+Most habit trackers store user data on their own servers, which can be a privacy risk. **Loopin** solves this by using a "Zero-Server" approach. Your data stays on your phone and syncs only to your personal Google Drive. To make tracking more interesting, I added an RPG system where completing habits earned you XP and rewards.
 
-[**Download Release APK**](https://github.com/maisachinsharmahu/Loopin-Showcase/releases/tag/v1.0.0)
-
----
-
-## 🛠 Features and Design
-
-### 1. Centralized Habit Timeline
-The app uses a custom horizontal calendar strip where "Today" remains centered. This focal point approach makes it easy to track current tasks while maintaining a scrollable history.
-
-<p align="center">
-  <img src="assets/app_preview/home.png" width="300">
-  <img src="assets/app_preview/Daily Routine.png" width="300">
-</p>
-
-### 2. RPG Reward Engine
-Instead of just checkmarks, completions trigger XP gain, level progression, and loot drops. I implemented an event-driven queue to handle these rewards sequentially so they don't overlap in the UI.
-
-<p align="center">
-  <img src="assets/app_preview/Level Up.png" width="220">
-  <img src="assets/app_preview/XP Boost.png" width="220">
-  <img src="assets/app_preview/Bonus Drop.png" width="220">
-</p>
-
-### 3. Data Insights and Analytics
-I used Hive for the database because it's fast enough to handle real-time stats calculations. The app provides visual feedback on streaks, completion percentages, and productivity trends.
-
-<p align="center">
-  <img src="assets/app_preview/Stats 1.png" width="220">
-  <img src="assets/app_preview/Stats 2.png" width="220">
-  <img src="assets/app_preview/Stats 3.png" width="220">
-</p>
-
-### 4. Achievements and Social
-Users can unlock badges based on milestones. There is also a "Rivals" section where users can challenge themselves against others while maintaining encrypted data privacy.
+[**Download Release APK**](https://github.com/maisachinsharmahu/Loopin-Showcase/releases/tag/v1.0.0) | [**Jump to Architecture**](#-deep-dive-loopin-system-architecture)
 
 ---
 
-## 🏗 Technical Implementation
+## 🛠 Features
 
-### System Architecture
-The app follows a **Reactive MVVM** pattern. I chose **Provider** for state management to keep the business logic (RPG calculations and sync) separate from the UI widgets.
+### 1. The Centralized Hub
+I designed a custom horizontal calendar where "Today" is always in the center. This makes it very easy to stay focused on today's tasks while scrolling through past performance.
 
+<p align="center">
+  <img src="assets/app_preview/Daily Routine.png" width="280" style="margin: 10px">
+  <img src="assets/app_preview/home.png" width="280" style="margin: 10px">
+</p>
+
+### 2. RPG Progression System
+Every time you complete a habit, you get XP, level up, and get "Loot Drops." I built an event queue so that if multiple rewards happen at once, they show up one by one smoothly.
+
+<p align="center">
+  <img src="assets/app_preview/Level Up.png" width="220" style="margin: 5px">
+  <img src="assets/app_preview/XP Boost.png" width="220" style="margin: 5px">
+  <img src="assets/app_preview/Bonus Drop.png" width="220" style="margin: 5px">
+</p>
+
+### 3. Data Insights
+The app calculates streaks and completion rates. I used Hive because it's a NoSQL database that is much faster than SQL, allowing the stats to update instantly as you scroll.
+
+<p align="center">
+  <img src="assets/app_preview/Stats 1.png" width="220" style="margin: 5px">
+  <img src="assets/app_preview/Stats 2.png" width="220" style="margin: 5px">
+  <img src="assets/app_preview/Stats 3.png" width="220" style="margin: 5px">
+</p>
+
+### 4. Achievements and Journey
+I added a badge system and an achievement log to track your long-term progress.
+
+<p align="center">
+  <img src="assets/app_preview/achievements.png" width="280" style="margin: 10px">
+  <img src="assets/app_preview/Badge.png" width="280" style="margin: 10px">
+</p>
+
+### 5. Rivals and Social Sharing
+You can see how you compare to "Rivals" and share your wins. Even with social features, the data remains private and encrypted.
+
+<p align="center">
+  <img src="assets/app_preview/Rival.png" width="280" style="margin: 10px">
+  <img src="assets/app_preview/Share Win.png" width="280" style="margin: 10px">
+</p>
+
+---
+
+## 🏗 Engineering Architecture
+
+The app follows a **Reactive MVVM** pattern. It separates the UI from the logic using the **Provider** package.
+
+### High-Level Design
 ```mermaid
 graph TD
-    UI[Flutter UI] -->|Refreshes on| State[Provider State Management]
-    State -->|Triggers| Logic[RPG & Habit Engines]
-    Logic -->|Writes to| Hive[(Hive Local Storage)]
-    Hive -->|Backs up to| Sync[Google Drive Sync Service]
+    subgraph UI_Layer
+        HS[Home Screen]
+        RPG[Character Profile]
+        WB[Mood Graphics]
+    end
+
+    subgraph State_Management
+        HP[Habit Provider]
+        RP[RPG Provider]
+        WBP[Wellbeing Provider]
+    end
+
+    subgraph Core_Logic
+        Sync[Google Drive Sync Hub]
+        Loot[Loot Generator]
+    end
+
+    UI_Layer -->|Listen| State_Management
+    State_Management -->|Orchestrate| Core_Logic
+    Core_Logic -->|Save| Hive[(Hive Local Storage)]
 ```
 
-### Data Synergy and Persistence
-I used **Hive (NoSQL)** for all persistence. It works by storing data in binary "boxes" which is much faster than traditional SQL on mobile devices.
-- `habit_box`: Stores habit configurations.
-- `checkin_box`: Stores daily logs using a `${habitId}_${date}` key format.
-- `rpg_profile_box`: Stores XP, Coins, and Inventory.
+---
+
+## 🔬 Technical Case Studies (Problems I Solved)
+
+### 1. Centering the Timeline
+Standard lists in Flutter don't stay centered on a specific item. I had to write custom math for the `ScrollController` so that the app calculates exactly where "Today" should be based on the screen width.
+`Offset = (Index * Width) + Padding - (Screen / 2) + (Card / 2)`
+
+### 2. Google Drive Sync and Data Safety
+Syncing can fail if the internet is slow. To prevent data corruption, I built a "Write-Ahead" sync logic. It packages everything into a JSON file and only updates the sync status after the Google Drive API confirms the file was safely saved.
+
+### 3. iOS File Recognition
+iOS does not know what a `.loopin` file is. I fixed this by registering a custom **UTI (Uniform Type Identifier)** in the `Info.plist`. Now the iOS Files app treats Loopin backups as proper documents.
 
 ---
 
-## 🔬 Engineering Case Studies
+## 🛠 Deep-Dive: System Design
 
-### 1. Atomic Sync Implementation
-Syncing data with Google Drive was a challenge because network drops can cause partial data loss. I implemented an **Atomic Sync** logic:
-- The app serializes all Hive data into a single JSON stream.
-- It performs a multipart upload to a hidden `appDataFolder` in the user's Drive.
-- The local state only updates 'lastSync' once the Drive API confirms a 200 OK status.
+### 1. RPG Event Queue
+If you finish a habit and also unlock an achievement, the app might try to show two popups at once. I solved this by creating a **List-based Queue**. Every reward is "pushed" into the queue and "popped" one after another.
 
-### 2. Centered Timeline Logic
-To keep "Today" centered across different screen sizes, I had to calculate the scroll offset manually in the `initState`:
-```dart
-offset = (pastDays * cardWidth) + padding - (screenWidth / 2) + (cardWidth / 2)
+### 2. Database Schema
+I split the data into multiple specialized **Hive Boxes** to keep lookups fast.
+- `habit_box`: Core habit data.
+- `checkin_box`: Completion history.
+- `rpg_profile_box`: Level and XP.
+
+### 3. Cloud Sync Flow
+```mermaid
+sequenceDiagram
+    participant App as Loopin App
+    participant Broker as Sync Logic
+    participant GDrive as Google Drive
+    
+    App->>Broker: Start Sync
+    Broker->>App: Collect all data from Hive
+    Broker->>Broker: Create JSON backup
+    Broker->>GDrive: Upload to private folder
+    GDrive-->>Broker: OK (200)
+    Broker->>App: Update Sync Time
 ```
-This ensures the focal point is consistent regardless of the device's resolution or DPI.
 
-### 3. iOS File Support
-iOS doesn't recognize custom file extensions like `.loopin` by default. I had to register a custom **UTI (Uniform Type Identifier)** in the `Info.plist`. This allows the iOS Files app to recognize the backup file and let users select it for manual restores.
+### 4. Custom Drawing (Canvas)
+Instead of using images for the mood faces, I drew them using code (`CustomPainter`). This makes the app smaller in size and allows the faces to change colors dynamically based on the background.
 
----
-
-## 📈 Future Enhancements
-- On-device AI to analyze habit-mood correlations.
-- End-to-End Encrypted (E2EE) P2P challenges with friends.
-- Multi-cloud support for users who don't use Google Drive.
+### 5. Security
+I used OAuth 2.0 to access Google Drive. The app only asks for the `drive.appdata` scope, which means it can only access its own folder and cannot see your other files on Google Drive.
 
 ---
-*Note: This repository is a technical showcase for my portfolio. The source code is proprietary and not available here.*
+
+## 🛤 Future Roadmap
+- [x] Local Storage and Sync.
+- [x] RPG mechanics and XP system.
+- [ ] On-device AI for habit analysis.
+- [ ] P2P challenges and more social features.
+
+--- 
+*Note: This repository is a technical showcase for my portfolio. The source code is proprietary.*
