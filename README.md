@@ -1,39 +1,54 @@
-# Loopin: A Personal Habit Tracker with Data Privacy
+# Loopin — A Habit Tracker That Actually Keeps You Coming Back
 
 <p align="center">
   <img src="assets/app_preview/home.png" width="280">
-  <br>
-  <b>A habit tracker built with Flutter that focuses on privacy and gamification.</b>
 </p>
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Stack-Flutter%20%7C%20Hive%20%7C%20Provider-02569B?style=for-the-badge&logo=flutter" alt="Stack">
-  <img src="https://img.shields.io/badge/Architecture-Zero--Knowledge-4CAF50?style=for-the-badge&logo=shield" alt="Privacy">
-  <img src="https://img.shields.io/badge/Build-v1.0.0--Stable-orange?style=for-the-badge" alt="Build">
-</p>
+Most habit trackers die the same way. You download it, feel motivated for
+four or five days, then one streak breaks and the whole thing feels
+pointless, so you delete the app. I've done this with at least six different
+habit apps myself before I built Loopin.
+
+The other problem is quieter but bigger. Every habit app I tried wanted to
+store what habits I'm tracking, how many times I've failed, my sleep
+schedule, my water intake, basically my whole daily life, on their server.
+That's a lot of personal data to hand over just to remind yourself to drink
+water, right?
+
+So Loopin does two things differently.
+
+**First, nothing leaves your phone unless you want it to.** Everything is
+stored locally. If you turn on backup, it goes straight to your own personal
+Google Drive folder, not to some company's database. Nobody but you can see
+your habits, not even me.
+
+**Second, it doesn't feel like homework.** Instead of a plain checklist,
+completing a habit gives you XP, levels you up, and drops rewards, like a
+small RPG quietly running in the background of your daily routine. Turns out
+people stick to things longer when there's a small reward loop attached to
+it, so that's exactly what this is built around.
+
+[Download the APK from Releases](https://github.com/maisachinsharmahu/Loopin-Showcase/releases/tag/v1.0.0)
 
 ---
 
-## 📌 Project Overview
+## What's actually in the app
 
-Most habit trackers store user data on their own servers, which can be a privacy risk. **Loopin** solves this by using a "Zero-Server" approach. Your data stays on your phone and syncs only to your personal Google Drive. To make tracking more interesting, I added an RPG system where completing habits earned you XP and rewards.
-
-[**Download Release APK**](https://github.com/maisachinsharmahu/Loopin-Showcase/releases/tag/v1.0.0) | [**Jump to Architecture**](#-deep-dive-loopin-system-architecture)
-
----
-
-## 🛠 Features
-
-### 1. The Centralized Hub
-I designed a custom horizontal calendar where "Today" is always in the center. This makes it very easy to stay focused on today's tasks while scrolling through past performance.
+**A calendar that keeps today in the center.** Most habit apps make you
+scroll around to find today. Loopin's timeline always keeps today's card
+centered, so you never lose your place, whether you're checking off today's
+habits or scrolling back to see how last week went.
 
 <p align="center">
   <img src="assets/app_preview/Daily Routine.png" width="280" style="margin: 10px">
   <img src="assets/app_preview/home.png" width="280" style="margin: 10px">
 </p>
 
-### 2. RPG Progression System
-Every time you complete a habit, you get XP, level up, and get "Loot Drops." I built an event queue so that if multiple rewards happen at once, they show up one by one smoothly.
+**The RPG layer.** Complete a habit, get XP. Level up, get a loot drop.
+Finish three habits back to back and all three rewards queue up and play out
+one after another instead of dumping on top of each other, small detail, but
+it's the kind of thing that makes an app feel finished instead of thrown
+together.
 
 <p align="center">
   <img src="assets/app_preview/Level Up.png" width="220" style="margin: 5px">
@@ -41,8 +56,9 @@ Every time you complete a habit, you get XP, level up, and get "Loot Drops." I b
   <img src="assets/app_preview/Bonus Drop.png" width="220" style="margin: 5px">
 </p>
 
-### 3. Data Insights
-The app calculates streaks and completion rates. I used Hive because it's a NoSQL database that is much faster than SQL, allowing the stats to update instantly as you scroll.
+**Stats that update as you scroll.** Streaks, completion rates, all worked
+out on your device itself, so there's no loading spinner every time you open
+the stats tab.
 
 <p align="center">
   <img src="assets/app_preview/Stats 1.png" width="220" style="margin: 5px">
@@ -50,16 +66,17 @@ The app calculates streaks and completion rates. I used Hive because it's a NoSQ
   <img src="assets/app_preview/Stats 3.png" width="220" style="margin: 5px">
 </p>
 
-### 4. Achievements and Journey
-I added a badge system and an achievement log to track your long-term progress.
+**Achievements and a proper journey log**, so your long-term progress
+actually shows up somewhere, not just today's checklist.
 
 <p align="center">
   <img src="assets/app_preview/achievements.png" width="280" style="margin: 10px">
   <img src="assets/app_preview/Badge.png" width="280" style="margin: 10px">
 </p>
 
-### 5. Rivals and Social Sharing
-You can see how you compare to "Rivals" and share your wins. Even with social features, the data remains private and encrypted.
+**Rivals, without giving up privacy.** You can compare progress with friends
+and share your wins, but your actual habit data stays private and encrypted
+even with the social features turned on.
 
 <p align="center">
   <img src="assets/app_preview/Rival.png" width="280" style="margin: 10px">
@@ -68,90 +85,37 @@ You can see how you compare to "Rivals" and share your wins. Even with social fe
 
 ---
 
-## 🏗 Engineering Architecture
+## How it's built, the short version
 
-The app follows a **Reactive MVVM** pattern. It separates the UI from the logic using the **Provider** package.
+Built in Flutter, so it feels native on both iOS and Android from one
+codebase. Everything lives in a fast local database on your device itself,
+that's what lets stats and streaks update instantly with no loading time at
+all.
 
-### High-Level Design
-```mermaid
-graph TD
-    subgraph UI_Layer
-        HS[Home Screen]
-        RPG[Character Profile]
-        WB[Mood Graphics]
-    end
+A couple of things took a lot more effort than they let on. The centered
+timeline was one, normal scroll behaviour in Flutter doesn't keep a moving
+list locked on one item, so that had to be built from scratch. The backup to
+Drive was another, a habit tracker losing your data mid-sync is worse than
+not having sync at all, so it's built to never leave things half-saved, even
+if your internet drops in the middle of an upload.
 
-    subgraph State_Management
-        HP[Habit Provider]
-        RP[RPG Provider]
-        WBP[Wellbeing Provider]
-    end
-
-    subgraph Core_Logic
-        Sync[Google Drive Sync Hub]
-        Loot[Loot Generator]
-    end
-
-    UI_Layer -->|Listen| State_Management
-    State_Management -->|Orchestrate| Core_Logic
-    Core_Logic -->|Save| Hive[(Hive Local Storage)]
-```
+I'm not going deeper into the exact architecture here since this repo is a
+showcase and the source stays closed, but if you're genuinely curious how
+some part of it works, just ask me directly. I like talking about this stuff.
 
 ---
 
-## 🔬 Technical Case Studies (Problems I Solved)
+## What's next
 
-### 1. Centering the Timeline
-Standard lists in Flutter don't stay centered on a specific item. I had to write custom math for the `ScrollController` so that the app calculates exactly where "Today" should be based on the screen width.
-`Offset = (Index * Width) + Padding - (Screen / 2) + (Card / 2)`
-
-### 2. Google Drive Sync and Data Safety
-Syncing can fail if the internet is slow. To prevent data corruption, I built a "Write-Ahead" sync logic. It packages everything into a JSON file and only updates the sync status after the Google Drive API confirms the file was safely saved.
-
-### 3. iOS File Recognition
-iOS does not know what a `.loopin` file is. I fixed this by registering a custom **UTI (Uniform Type Identifier)** in the `Info.plist`. Now the iOS Files app treats Loopin backups as proper documents.
+- [x] Local-first storage and Drive backup
+- [x] RPG mechanics and XP system
+- [ ] On-device suggestions based on your own habit patterns
+- [ ] Challenges between friends
 
 ---
 
-## 🛠 Deep-Dive: System Design
+This is a portfolio showcase repo, the source code is closed. Want to see it
+running properly, download the APK above, or just message me and I'll walk
+you through it myself.
 
-### 1. RPG Event Queue
-If you finish a habit and also unlock an achievement, the app might try to show two popups at once. I solved this by creating a **List-based Queue**. Every reward is "pushed" into the queue and "popped" one after another.
-
-### 2. Database Schema
-I split the data into multiple specialized **Hive Boxes** to keep lookups fast.
-- `habit_box`: Core habit data.
-- `checkin_box`: Completion history.
-- `rpg_profile_box`: Level and XP.
-
-### 3. Cloud Sync Flow
-```mermaid
-sequenceDiagram
-    participant App as Loopin App
-    participant Broker as Sync Logic
-    participant GDrive as Google Drive
-    
-    App->>Broker: Start Sync
-    Broker->>App: Collect all data from Hive
-    Broker->>Broker: Create JSON backup
-    Broker->>GDrive: Upload to private folder
-    GDrive-->>Broker: OK (200)
-    Broker->>App: Update Sync Time
-```
-
-### 4. Custom Drawing (Canvas)
-Instead of using images for the mood faces, I drew them using code (`CustomPainter`). This makes the app smaller in size and allows the faces to change colors dynamically based on the background.
-
-### 5. Security
-I used OAuth 2.0 to access Google Drive. The app only asks for the `drive.appdata` scope, which means it can only access its own folder and cannot see your other files on Google Drive.
-
----
-
-## 🛤 Future Roadmap
-- [x] Local Storage and Sync.
-- [x] RPG mechanics and XP system.
-- [ ] On-device AI for habit analysis.
-- [ ] P2P challenges and more social features.
-
---- 
-*Note: This repository is a technical showcase for my portfolio. The source code is proprietary.*
+**[sachinsharma.dev](https://sachinsharma.dev)**
